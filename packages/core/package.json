@@ -1,0 +1,9 @@
+{
+  "name": "@querify/core",
+  "module": "src/index.ts",
+  "type": "module",
+  "sideEffects": false,
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}
