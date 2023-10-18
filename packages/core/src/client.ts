@@ -1,16 +1,17 @@
-import { createCache } from "./cache";
+import { createQueryCache } from "./cache";
 
 export function createClient() {
-  const cache = createCache();
+  const queryCache = createQueryCache();
+
   return {
     mount() {
       console.log("client mounted");
     },
-    getCache() {
-      return cache;
+    getQueryCache() {
+      return queryCache;
     },
     clear() {
-      cache.clear();
+      queryCache.clear();
     },
     unmount() {
       console.log("client unmounted");

@@ -3,10 +3,10 @@ import { Client, createClient } from "../client";
 
 describe("client", () => {
   let client: Client;
-  let cache;
+  let queryCache;
   beforeEach(() => {
     client = createClient();
-    cache = client.getCache();
+    queryCache = client.getQueryCache();
   });
 
   afterEach(() => {
@@ -16,6 +16,6 @@ describe("client", () => {
 
   it("should create a client", () => {
     const client = createClient();
-    expect(client).toHaveProperty("cache");
+    expect(client.getQueryCache()).toBeTruthy();
   });
 });
