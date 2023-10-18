@@ -22,9 +22,7 @@ describe("useClient", () => {
       return <div>hello</div>;
     }
 
-    expect(() => render(<Page />)).toThrow(
-      "No QueryClient set, use <ClientProvider> to set one",
-    );
+    expect(() => render(<Page />)).toThrow("No QueryClient set, use <ClientProvider> to set one");
   });
 
   it("should return client from context", () => {

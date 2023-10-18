@@ -14,11 +14,7 @@ export function ClientProvider(props: ClientProviderProps) {
     };
   }, [props.client]);
 
-  return (
-    <ClientContext.Provider value={props.client}>
-      {props.children}
-    </ClientContext.Provider>
-  );
+  return <ClientContext.Provider value={props.client}>{props.children}</ClientContext.Provider>;
 }
 
 export function useClient(client?: Client) {
