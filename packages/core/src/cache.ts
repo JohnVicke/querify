@@ -1,10 +1,10 @@
 export function createQueryCache() {
   const cache = new Map();
   return {
-    get(key) {
+    get(key: any) {
       return cache.get(key);
     },
-    add(key, value) {
+    add(key: any, value: any) {
       cache.set(key, value);
     },
     clear() {

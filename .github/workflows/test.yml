@@ -1,20 +1,20 @@
 jobs:
-  fmt:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout actions
         uses: actions/checkout@v3
       - name: Prepare actions
         uses: ./.github/actions/prepare
-      - name: fmt
-        run: bun run fmt
+      - name: test
+        run: bun run test
       - uses: mshick/add-pr-comment@v2
         if: failure()
         with:
           message-failure: |
-            Uh oh! ESLint found some issues. Please run `bun lint:fix` and commit the changes
+            Uh oh! Some tests are broken. Please fix them and commit the changes
 
-name: Biome lint&format
+name: Bun Test
 
 on:
   pull_request: ~

@@ -3,7 +3,7 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "test": "bun test --preload './src/tests/happydom.ts'"
+    "test": "bun test --coverage --preload ./src/tests/happydom.ts"
   },
   "devDependencies": {
     "@querify/ts-utils": "workspace:*",

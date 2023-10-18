@@ -5,6 +5,7 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
+    "test": "bun test --coverage",
     "build": "bun ./src/build.ts & bunx tsc --emitDeclarationOnly --p tsconfig.build.json"
   },
   "devDependencies": {

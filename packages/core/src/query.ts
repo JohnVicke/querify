@@ -8,7 +8,9 @@ interface QueryState<TData = unknown, TError = Error> {
   error: TError | null;
 }
 
-type UpdateFn = <TData, TError>(state: QueryState<TData, TError>) => QueryState<TData, TError>;
+type UpdateFn = <TData, TError>(
+  state: QueryState<TData, TError>,
+) => QueryState<TData, TError>;
 
 interface CreateQueryOptions<TData = unknown> {
   key: QueryKey;
@@ -16,7 +18,10 @@ interface CreateQueryOptions<TData = unknown> {
   onSuccess?: (data: TData) => void | Promise<void>;
 }
 
-export function createQuery<TData = unknown, TError = Error>(client: Client, queryOptions: CreateQueryOptions<TData>) {
+export function createQuery<TData = unknown, TError = Error>(
+  client: Client,
+  queryOptions: CreateQueryOptions<TData>,
+) {
   const hash = hashKey(queryOptions.key);
 
   const state = {
@@ -31,9 +36,9 @@ export function createQuery<TData = unknown, TError = Error>(client: Client, que
     state,
   };
 
-  function update(updateFn: UpdateFn) {
+  /* function update(updateFn: UpdateFn) {
     query.state = updateFn<TData, TError>(query.state);
-  }
+  } */
 
   return query;
 }
