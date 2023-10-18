@@ -2,48 +2,91 @@ import { Client } from ".";
 
 export type QueryKey = PropertyKey[];
 
-interface QueryState<TData = unknown, TError = Error> {
-  status: "idle" | "loading" | "success" | "error";
+interface QueryState<TData, TError> {
+  status?: "success" | "error";
   data: TData | null;
   error: TError | null;
+  isFetching: boolean;
 }
 
-type UpdateFn = <TData, TError>(
-  state: QueryState<TData, TError>,
-) => QueryState<TData, TError>;
-
-interface CreateQueryOptions<TData = unknown> {
+interface CreateQueryOptions<TData> {
   key: QueryKey;
   queryFn: (...args: any) => Promise<TData>;
   onSuccess?: (data: TData) => void | Promise<void>;
 }
 
+interface Query<TData, TError> {
+  key: QueryKey;
+  hash: string;
+  promise: Promise<void> | null;
+  state: QueryState<TData, TError>;
+  subscribers: Set<unknown>;
+  setState: (updateFn: UpdateFn<TData, TError>) => void;
+  fetch: () => Promise<void>;
+}
+
+type UpdateFn<TData, TError> = (
+  state: QueryState<TData, TError>,
+) => QueryState<TData, TError>;
+
 export function createQuery<TData = unknown, TError = Error>(
   client: Client,
   queryOptions: CreateQueryOptions<TData>,
 ) {
-  const hash = hashKey(queryOptions.key);
+  function setState(updateFn: UpdateFn<TData, TError>) {
+    query.state = updateFn(query.state);
+  }
 
-  const state = {
-    status: "idle",
-    data: null,
-    error: null,
-  } satisfies QueryState<TData, TError>;
+  function fetch() {
+    if (!query.promise) {
+      query.promise = (async () => {
+        query.setState((state) => ({
+          ...state,
+          isFetching: true,
+        }));
+        try {
+          const data = await queryOptions.queryFn();
+          query.setState((state) => ({
+            ...state,
+            data,
+            status: "success",
+          }));
+        } catch (error) {
+          query.setState((state) => ({
+            ...state,
+            error: error as TError,
+            status: "error",
+          }));
+        } finally {
+          query.setState((state) => ({
+            ...state,
+            isFetching: false,
+          }));
+          query.promise = null;
+        }
+      })();
+    }
+    return query.promise;
+  }
 
-  const query = {
-    hash,
+  const query: Query<TData, TError> = {
     key: queryOptions.key,
-    state,
+    hash: hashKey(queryOptions.key),
+    promise: null,
+    state: {
+      data: null,
+      error: null,
+      isFetching: false,
+    },
+    subscribers: new Set(),
+    setState,
+    fetch,
   };
-
-  /* function update(updateFn: UpdateFn) {
-    query.state = updateFn<TData, TError>(query.state);
-  } */
 
   return query;
 }
 
-function hashKey(key: QueryKey) {
+export function hashKey(key: QueryKey) {
   const concatentatedKey = key.join("|");
 
   if (concatentatedKey.length === 0) {
