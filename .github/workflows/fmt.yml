@@ -1,5 +1,5 @@
 jobs:
-  lint:
+  fmt:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout actions

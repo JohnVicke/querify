@@ -6,6 +6,9 @@
   "linter": {
     "enabled": true,
     "rules": {
+      "suspicious": {
+        "noExplicitAny": "warn"
+      },
       "recommended": true
     },
     "ignore": ["node_modules", ".next", "dist", ".nuxt", ".contentlayer"]
