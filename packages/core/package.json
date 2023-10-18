@@ -1,9 +1,23 @@
 {
   "name": "@querify/core",
+  "version": "0.0.1",
   "module": "src/index.ts",
   "type": "module",
   "sideEffects": false,
+  "scripts": {
+    "build": "bun ./src/build.ts & bunx tsc --emitDeclarationOnly --p tsconfig.build.json"
+  },
   "devDependencies": {
-    "bun-types": "latest"
+    "@querify/ts-utils": "workspace:*",
+    "bun-types": "latest",
+    "typescript": "latest"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "default": "./build/index.js",
+        "types": "./build/index.d.ts"
+      }
+    }
   }
 }

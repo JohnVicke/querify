@@ -1,3 +1,2 @@
-export function add(a: number, b: number) {
-  return a + b;
-}
+export { createClient } from "./client";
+export type { Client } from "./client";
