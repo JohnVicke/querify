@@ -5,6 +5,14 @@
   "scripts": {
     "test": "bun test --coverage --preload ./src/tests/happydom.ts"
   },
+  "exports": {
+    ".": {
+      "import": {
+        "default": "./src/index.ts",
+        "types": "./src/index.ts"
+      }
+    }
+  },
   "devDependencies": {
     "@querify/ts-utils": "workspace:*",
     "@happy-dom/global-registrator": "^12.9.1",
