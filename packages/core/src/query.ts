@@ -1,28 +1,35 @@
 import { Client } from ".";
+import { Observer } from "./observer";
+import { iife } from "./utils";
 
 export type QueryKey = PropertyKey[];
 
-interface QueryState<TData, TError> {
+export interface QueryState<TData, TError> {
   status?: "success" | "error";
   data: TData | null;
   error: TError | null;
   isFetching: boolean;
+  lastUpdated?: number;
 }
 
-interface CreateQueryOptions<TData> {
+export interface CreateQueryOptions<TData> {
   key: QueryKey;
   queryFn: (...args: any) => Promise<TData>;
   onSuccess?: (data: TData) => void | Promise<void>;
+  staleTime?: number;
+  cacheTime?: number;
 }
 
-interface Query<TData, TError> {
+export interface Query<TData = unknown, TError = Error> {
   key: QueryKey;
   hash: string;
   promise: Promise<void> | null;
   state: QueryState<TData, TError>;
-  subscribers: Set<unknown>;
+  subscribe: (observer: Observer<TData, TError>) => () => void;
+  subscribers: Set<Observer<TData, TError>>;
   setState: (updateFn: UpdateFn<TData, TError>) => void;
   fetch: () => Promise<void>;
+  gcTimeout: Timer | null;
 }
 
 type UpdateFn<TData, TError> = (
@@ -35,11 +42,14 @@ export function createQuery<TData = unknown, TError = Error>(
 ) {
   function setState(updateFn: UpdateFn<TData, TError>) {
     query.state = updateFn(query.state);
+    query.subscribers.forEach((observer) => {
+      observer.notify();
+    });
   }
 
   function fetch() {
     if (!query.promise) {
-      query.promise = (async () => {
+      query.promise = iife(async () => {
         query.setState((state) => ({
           ...state,
           isFetching: true,
@@ -50,6 +60,7 @@ export function createQuery<TData = unknown, TError = Error>(
             ...state,
             data,
             status: "success",
+            lastUpdated: Date.now(),
           }));
         } catch (error) {
           query.setState((state) => ({
@@ -64,14 +75,31 @@ export function createQuery<TData = unknown, TError = Error>(
           }));
           query.promise = null;
         }
-      })();
+      });
     }
     return query.promise;
+  }
+
+  function scheduleGC() {
+    query.gcTimeout = setTimeout(
+      () => {
+        client.getQueryCache().delete(query.hash);
+      },
+      queryOptions.cacheTime ?? 5 * 60 * 1000,
+    );
+  }
+
+  function clearGC() {
+    if (query.gcTimeout) {
+      clearTimeout(query.gcTimeout);
+      query.gcTimeout = null;
+    }
   }
 
   const query: Query<TData, TError> = {
     key: queryOptions.key,
     hash: hashKey(queryOptions.key),
+    gcTimeout: null,
     promise: null,
     state: {
       data: null,
@@ -79,6 +107,13 @@ export function createQuery<TData = unknown, TError = Error>(
       isFetching: false,
     },
     subscribers: new Set(),
+    subscribe: (observer) => {
+      query.subscribers.add(observer);
+      clearGC();
+      return () => {
+        scheduleGC();
+      };
+    },
     setState,
     fetch,
   };

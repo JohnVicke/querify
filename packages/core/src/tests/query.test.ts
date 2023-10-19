@@ -31,4 +31,24 @@ describe("query", () => {
     expect(query.hash).toEqual(hash);
     expect(query.state).toEqual(initialState);
   });
+  it("should query data and update state", async () => {
+    const key = ["todos"] satisfies QueryKey;
+    const query = createQuery(client, {
+      key,
+      queryFn: () => Promise.resolve("data"),
+    });
+    await query.fetch();
+    expect(query.state.data).toEqual("data");
+    expect(query.state.status).toEqual("success");
+  });
+  it("should dedup async function with the same query key", async () => {
+    const key = ["todos"] satisfies QueryKey;
+    const query = createQuery(client, {
+      key,
+      queryFn: () => Promise.resolve("data"),
+    });
+    const promise1 = query.fetch();
+    const promise2 = query.fetch();
+    expect(promise1).toEqual(promise2);
+  });
 });
