@@ -1,22 +1,22 @@
 import { Client } from ".";
 import { CreateQueryOptions, QueryState } from "./query";
 
-export interface Observer<TData, TError> {
+export interface Observer<TData> {
   notify: () => void;
-  getResult: () => QueryState<TData, TError>;
+  getResult: () => QueryState<TData>;
   subscribe: (callback: () => void) => () => void;
   fetch: () => void;
 }
 
-export function createQueryObserver<TData, TError>(
+export function createQueryObserver<TData>(
   client: Client,
-  options: CreateQueryOptions<TData> & { staleTime?: number },
+  options: CreateQueryOptions<TData>,
 ) {
   const query = client.get(options);
 
-  const observer = {
+  const observer: Observer<TData> = {
     notify: () => {},
-    getResult: () => query.state,
+    getResult: () => query.state as QueryState<TData>,
     subscribe: (callback: () => void) => {
       observer.notify = callback;
       const unsubscribe = query.subscribe(observer);
@@ -26,7 +26,7 @@ export function createQueryObserver<TData, TError>(
     fetch: () => {
       query.fetch();
     },
-  } satisfies Observer<TData, TError>;
+  };
 
   return observer;
 }

@@ -6,8 +6,8 @@ export function createQueryCache() {
     has(key: string) {
       return cache.has(key);
     },
-    get(key: string) {
-      return cache.get(key);
+    get<T>(key: string): Query<T> {
+      return cache.get(key) as Query<T>;
     },
     add(key: string, value: Query) {
       cache.set(key, value);

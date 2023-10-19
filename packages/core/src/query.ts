@@ -4,43 +4,42 @@ import { iife } from "./utils";
 
 export type QueryKey = PropertyKey[];
 
-export interface QueryState<TData, TError> {
+export interface QueryState<TData> {
   status?: "success" | "error";
   data: TData | null;
-  error: TError | null;
+  error: Error | null;
   isFetching: boolean;
   lastUpdated?: number;
 }
 
 export interface CreateQueryOptions<TData> {
   key: QueryKey;
-  queryFn: (...args: any) => Promise<TData>;
+  queryFn: () => Promise<TData>;
   onSuccess?: (data: TData) => void | Promise<void>;
+  onError?: (error: Error) => void | Promise<void>;
   staleTime?: number;
   cacheTime?: number;
 }
 
-export interface Query<TData = unknown, TError = Error> {
+export interface Query<TData = unknown> {
   key: QueryKey;
   hash: string;
   promise: Promise<void> | null;
-  state: QueryState<TData, TError>;
-  subscribe: (observer: Observer<TData, TError>) => () => void;
-  subscribers: Set<Observer<TData, TError>>;
-  setState: (updateFn: UpdateFn<TData, TError>) => void;
+  state: QueryState<TData>;
+  subscribe: (observer: Observer<TData>) => () => void;
+  subscribers: Set<Observer<TData>>;
+  setState: (updateFn: UpdateFn<TData>) => void;
   fetch: () => Promise<void>;
   gcTimeout: Timer | null;
 }
 
-type UpdateFn<TData, TError> = (
-  state: QueryState<TData, TError>,
-) => QueryState<TData, TError>;
+type UpdateFn<TData> = (state: QueryState<TData>) => QueryState<TData>;
 
-export function createQuery<TData = unknown, TError = Error>(
+export function createQuery<TData = unknown>(
   client: Client,
   queryOptions: CreateQueryOptions<TData>,
 ) {
-  function setState(updateFn: UpdateFn<TData, TError>) {
+  function setState(updateFn: UpdateFn<TData>) {
     query.state = updateFn(query.state);
     query.subscribers.forEach((observer) => {
       observer.notify();
@@ -65,7 +64,7 @@ export function createQuery<TData = unknown, TError = Error>(
         } catch (error) {
           query.setState((state) => ({
             ...state,
-            error: error as TError,
+            error: error as Error,
             status: "error",
           }));
         } finally {
@@ -96,7 +95,7 @@ export function createQuery<TData = unknown, TError = Error>(
     }
   }
 
-  const query: Query<TData, TError> = {
+  const query: Query<TData> = {
     key: queryOptions.key,
     hash: hashKey(queryOptions.key),
     gcTimeout: null,

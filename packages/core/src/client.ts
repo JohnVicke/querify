@@ -8,10 +8,10 @@ export function createClient() {
     get<TData>(options: CreateQueryOptions<TData>) {
       const hashedKey = hashKey(options.key);
       if (queryCache.has(hashedKey)) {
-        return queryCache.get(hashedKey) as Query<TData>;
+        return queryCache.get(hashedKey);
       }
       const query = createQuery<TData>(this, options);
-      queryCache.add(hashedKey, query);
+      queryCache.add(hashedKey, query as Query);
       return query;
     },
     mount() {
