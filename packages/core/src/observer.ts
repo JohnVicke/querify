@@ -24,7 +24,13 @@ export function createQueryObserver<TData>(
       return unsubscribe;
     },
     fetch: () => {
-      query.fetch();
+      if (
+        !query.state.lastUpdated ||
+        Date.now() - query.state.lastUpdated > (options?.staleTime ?? 0)
+      ) {
+        console.log("[observer:fetch]", query.key);
+        query.fetch();
+      }
     },
   };
 
