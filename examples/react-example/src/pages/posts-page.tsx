@@ -3,10 +3,13 @@ import { Link } from "react-router-dom";
 
 export function PostsPage() {
   const result = usePosts();
-  console.log({ result });
 
   if (result.isFetching) {
     return <div>loading...</div>;
+  }
+
+  if (result.status === "error") {
+    return <div>{result.error.message}</div>;
   }
 
   return (
@@ -45,6 +48,7 @@ function usePosts() {
   const result = useQuery({
     key: ["posts"],
     queryFn: getPosts,
+    staleTime: Infinity,
   });
   return result;
 }
