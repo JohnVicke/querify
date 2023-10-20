@@ -1,0 +1,26 @@
+.__querify_dev_tools {
+  font-family: monospace;
+  display: flex;
+  flex-direction: column;
+  background: #2a2a2a;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.__querify_dev_tools__query {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  color: #fff;
+  font-size: 0.8rem;
+  overflow: auto;
+  .error {
+    color: #ff0000;
+  }
+  .success {
+   color: #00ff00;
+  }
+}
