@@ -3,6 +3,7 @@ import { hashKey, type CreateQueryOptions, createQuery, Query } from "./query";
 
 export function createClient() {
   const queryCache = createQueryCache();
+  const subscribers = [] as Array<() => void>;
 
   return {
     get<TData>(options: CreateQueryOptions<TData>) {
@@ -15,7 +16,7 @@ export function createClient() {
       return query;
     },
     mount() {
-      console.log("client mounted");
+      console.log("[client:mount]");
     },
     getQueryCache() {
       return queryCache;
@@ -24,7 +25,22 @@ export function createClient() {
       queryCache.clear();
     },
     unmount() {
-      console.log("client unmounted");
+      console.log("[client:unmount] clearing cache");
+      this.clear();
+      subscribers.length = 0;
+    },
+    subscribe(callback: () => void) {
+      subscribers.push(callback);
+      return () => {
+        subscribers.filter((cb) => cb !== callback);
+      };
+    },
+    notify() {
+      console.log("[client:notify]");
+      subscribers.forEach((callback) => callback());
+    },
+    queries() {
+      return Array.from(queryCache.values()) as Query[];
     },
   };
 }
