@@ -1,6 +1,8 @@
+import "./dev-tools.css";
 import * as React from "react";
 import { type Client } from "@querify/core";
 import { WithChildren } from "./types";
+import { QueryDevTools } from ".";
 
 const ClientContext = React.createContext<Client | null>(null);
 
@@ -14,7 +16,12 @@ export function ClientProvider(props: ClientProviderProps) {
     };
   }, [props.client]);
 
-  return <ClientContext.Provider value={props.client}>{props.children}</ClientContext.Provider>;
+  return (
+    <ClientContext.Provider value={props.client}>
+      <QueryDevTools />
+      {props.children}
+    </ClientContext.Provider>
+  );
 }
 
 export function useClient(client?: Client) {
