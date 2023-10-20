@@ -1,16 +1,31 @@
 import { Client } from ".";
 import { Observer } from "./observer";
-import { iife } from "./utils";
+import { iife } from "@querify/utils";
 
 export type QueryKey = PropertyKey[];
 
-export interface QueryState<TData> {
-  status?: "success" | "error";
-  data: TData | null;
-  error: Error | null;
+interface IdleQueryState {
+  status: "idle";
+  error?: never;
+  data?: never;
+}
+
+interface SuccesfulQueryState<TData> {
+  status: "success";
+  data: TData;
+  error?: never;
+}
+
+interface ErrorQueryState {
+  status: "error";
+  error: Error;
+  data?: never;
+}
+
+export type QueryState<TData> = {
   isFetching: boolean;
   lastUpdated?: number;
-}
+} & (SuccesfulQueryState<TData> | ErrorQueryState | IdleQueryState);
 
 export interface CreateQueryOptions<TData> {
   key: QueryKey;
@@ -44,9 +59,11 @@ export function createQuery<TData = unknown>(
     query.subscribers.forEach((observer) => {
       observer.notify();
     });
+    client.notify();
   }
 
   function fetch() {
+    console.log("[query:fetch]", query.key);
     if (!query.promise) {
       query.promise = iife(async () => {
         query.setState((state) => ({
@@ -56,16 +73,16 @@ export function createQuery<TData = unknown>(
         try {
           const data = await queryOptions.queryFn();
           query.setState((state) => ({
-            ...state,
-            data,
             status: "success",
+            data,
+            isFetching: state.isFetching,
             lastUpdated: Date.now(),
           }));
         } catch (error) {
           query.setState((state) => ({
-            ...state,
-            error: error as Error,
             status: "error",
+            isFetching: state.isFetching,
+            error: error as Error,
           }));
         } finally {
           query.setState((state) => ({
@@ -80,16 +97,19 @@ export function createQuery<TData = unknown>(
   }
 
   function scheduleGC() {
+    console.log("[query:scheduleGC]", query.key);
     query.gcTimeout = setTimeout(
       () => {
         client.getQueryCache().delete(query.hash);
+        client.notify();
       },
-      queryOptions.cacheTime ?? 5 * 60 * 1000,
+      5 * 60 * 1000, // queryOptions.cacheTime ??
     );
   }
 
   function clearGC() {
     if (query.gcTimeout) {
+      console.log("[query:clearGC]", query.key);
       clearTimeout(query.gcTimeout);
       query.gcTimeout = null;
     }
@@ -101,8 +121,7 @@ export function createQuery<TData = unknown>(
     gcTimeout: null,
     promise: null,
     state: {
-      data: null,
-      error: null,
+      status: "idle",
       isFetching: false,
     },
     subscribers: new Set(),
