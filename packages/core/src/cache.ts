@@ -15,6 +15,9 @@ export function createQueryCache() {
     delete(key: string) {
       cache.delete(key);
     },
+    values() {
+      return cache.values();
+    },
     clear() {
       cache.clear();
     },
