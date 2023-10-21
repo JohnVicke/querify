@@ -9,7 +9,7 @@
   width: 100%;
 }
 
-.__querify_dev_tools__query {
+.__query {
   flex: 1;
   display: flex;
   gap: 0.5rem;
@@ -22,5 +22,8 @@
   }
   .success {
    color: #00ff00;
+  }
+  .fetching {
+    color: #ffff00;
   }
 }

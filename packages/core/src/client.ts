@@ -1,7 +1,10 @@
 import { createQueryCache } from "./cache";
+import { createLogger } from "./logger";
 import { hashKey, type CreateQueryOptions, createQuery, Query } from "./query";
 
 export function createClient() {
+  const logger = createLogger();
+  const log = logger.withCtx("client");
   const queryCache = createQueryCache();
   const subscribers = [] as Array<() => void>;
 
@@ -16,7 +19,7 @@ export function createClient() {
       return query;
     },
     mount() {
-      console.log("[client:mount]");
+      log(this.mount, "mounting");
     },
     getQueryCache() {
       return queryCache;
@@ -25,7 +28,7 @@ export function createClient() {
       queryCache.clear();
     },
     unmount() {
-      console.log("[client:unmount] clearing cache");
+      log(this.unmount, "unmounting");
       this.clear();
       subscribers.length = 0;
     },
@@ -36,11 +39,14 @@ export function createClient() {
       };
     },
     notify() {
-      console.log("[client:notify]");
+      log(this.notify, "notifying");
       subscribers.forEach((callback) => callback());
     },
     queries() {
       return Array.from(queryCache.values()) as Query[];
+    },
+    _logger(ctx: string) {
+      return logger.withCtx(ctx);
     },
   };
 }

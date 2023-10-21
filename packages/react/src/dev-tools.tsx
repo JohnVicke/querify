@@ -16,12 +16,10 @@ export function QueryDevTools() {
     <div className="__querify_dev_tools">
       {client.queries().map((query) => {
         return (
-          <div className="__querify_dev_tools__query" key={query.hash}>
+          <div className="__query" key={query.hash}>
             <div>{query.key.join(" ")}</div>
             <details style={{ width: "100%" }}>
-              <summary
-                className={query.state.status === "error" ? "error" : "success"}
-              >
+              <summary className={query.state.status}>
                 {query.state.status}
               </summary>
               {query.state.status === "error" && (

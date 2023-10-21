@@ -10,11 +10,13 @@ export function PostPage() {
 
   const result = usePost(parseInt(params.id, 10));
 
-  if (result.isFetching) {
+  if (result.status === "fetching") {
     return <div>loading...</div>;
   }
 
-  console.log(result);
+  if (result.status !== "success") {
+    return <div>error: {result.error?.message}</div>;
+  }
 
   return (
     <div>

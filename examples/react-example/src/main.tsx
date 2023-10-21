@@ -5,6 +5,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { PostPage } from "./pages/post-page.tsx";
 import { PostsPage } from "./pages/posts-page.tsx";
 import { RootLayout } from "./layouts/root-layout.tsx";
+import { TestPage } from "./pages/test-page.tsx";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
       {
         path: "/post/:id",
         element: <PostPage />,
+      },
+      {
+        path: "/test",
+        element: <TestPage />,
       },
     ],
   },

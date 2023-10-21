@@ -23,13 +23,11 @@ describe("query", () => {
       key,
       queryFn: () => Promise.resolve(),
     });
-    const initialState = {
-      data: null,
-      error: null,
-      isFetching: false,
-    };
+
     expect(query.hash).toEqual(hash);
-    expect(query.state).toEqual(initialState);
+    expect(query.state).toEqual({
+      status: "fetching",
+    });
   });
   it("should query data and update state", async () => {
     const key = ["todos"] satisfies QueryKey;
